@@ -1,3 +1,5 @@
+import { nanoid } from 'nanoid';
+
 /**
  * Хранилище состояния приложения
  */
@@ -42,9 +44,10 @@ class Store {
    * Добавление новой записи
    */
   addItem() {
+    const newCode = nanoid();
     this.setState({
       ...this.state,
-      list: [...this.state.list, {code: this.state.list.length + 1, title: 'Новая запись'}]
+      list: [...this.state.list, {code: newCode, title: 'Новая запись'}]
     })
   };
 
