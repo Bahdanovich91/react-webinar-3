@@ -47,7 +47,7 @@ class Store {
     const newCode = nanoid();
     this.setState({
       ...this.state,
-      list: [...this.state.list, {code: newCode, title: 'Новая запись'}]
+      list: [...this.state.list, {code: newCode, title: 'Новая запись', selectedCount: 0}]
     })
   };
 
@@ -71,9 +71,12 @@ class Store {
       ...this.state,
       list: this.state.list.map(item => {
         if (item.code === code) {
-          item.selected = !item.selected;
-        } else {
-          item.selected = false
+          if (!item.selected) {
+            item.selected = true;
+            item.selectedCount = item.selectedCount ? item.selectedCount + 1 : 1;
+          } else {
+            item.selected = false;
+          }
         }
         return item;
       })
