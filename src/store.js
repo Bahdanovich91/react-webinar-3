@@ -77,6 +77,8 @@ class Store {
           } else {
             item.selected = false;
           }
+        } else {
+          item.selected = false;
         }
         return item;
       })
