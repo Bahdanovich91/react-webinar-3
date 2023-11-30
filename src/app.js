@@ -1,8 +1,9 @@
-import React, {useCallback} from 'react';
+import React, { useCallback, useState, useEffect } from 'react';
 import List from "./components/list";
 import Controls from "./components/controls";
 import Head from "./components/head";
 import PageLayout from "./components/page-layout";
+import Cart from './components/cart';
 
 /**
  * Приложение
@@ -10,8 +11,14 @@ import PageLayout from "./components/page-layout";
  * @returns {React.ReactElement}
  */
 function App({store}) {
+  const [cartItems, setCartItems] = useState([]);
+  const [isCartOpen, setCartOpen] = useState(false);
+  const [uniqueCartItems, setUniqueCartItems] = useState([]);
 
-  const list = store.getState().list;
+  useEffect(() => {
+    const uniqueItems = Array.from(new Set(cartItems.map((item) => item.code)));
+    setUniqueCartItems(uniqueItems);
+  }, [cartItems]);
 
   const callbacks = {
     onDeleteItem: useCallback((code) => {
@@ -22,18 +29,44 @@ function App({store}) {
       store.selectItem(code);
     }, [store]),
 
-    onAddItem: useCallback(() => {
-      store.addItem();
-    }, [store])
-  }
+    onAddToCart: useCallback((item) => {
+      setCartItems((prevItems) => [...prevItems, { ...item, quantity: 1 }]);
+    }, []),
+
+    onDeleteFromCart: useCallback((item) => {
+      setCartItems((prevItems) => prevItems.filter((i) => i.code !== item.code));
+    }, []),
+  };
+
+  const openCart = useCallback(() => {
+    setCartOpen(true);
+  }, []);
+
+  const closeCart = useCallback(() => {
+    setCartOpen(false);
+  }, []);
 
   return (
     <PageLayout>
-      <Head title='Приложение на чистом JS'/>
-      <Controls onAdd={callbacks.onAddItem}/>
-      <List list={list}
-            onDeleteItem={callbacks.onDeleteItem}
-            onSelectItem={callbacks.onSelectItem}/>
+      <Head
+        title="Приложение"
+        onOpenCart={openCart}
+        uniqueItemCount={uniqueCartItems.length}
+        totalQuantity={cartItems.reduce((total, item) => total + item.quantity, 0)}
+      />
+      <List
+        list={store.getState().list}
+        onDeleteItem={callbacks.onDeleteItem}
+        onSelectItem={callbacks.onSelectItem}
+        onAddToCart={callbacks.onAddToCart}
+      />
+      {isCartOpen && (
+        <Cart
+          cartItems={cartItems}
+          onClose={closeCart}
+          onDeleteFromCart={callbacks.onDeleteFromCart}
+        />
+      )}
     </PageLayout>
   );
 }
